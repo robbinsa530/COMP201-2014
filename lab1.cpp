@@ -5,7 +5,7 @@
 #include <vector>
 using namespace std;
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[]) //I still dont fully understand the argc and argv or if they're necesarry...
 {
 	const char * c_string; //git bash won't open input file with name as a regular string. use this instead
 	string name;
