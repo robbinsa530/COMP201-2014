@@ -40,5 +40,6 @@ int main(int argc, char *argv[]) //I still dont fully understand the argc and ar
 		output << nums[count] << "\t" << nums[count] * nums[count] << "\t" << sum << endl; //output info
 		count++; //update integer count
 	}
+	input.close();
 	return 0;
 }
