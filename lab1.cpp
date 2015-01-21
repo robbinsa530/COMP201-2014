@@ -5,7 +5,7 @@
 #include <vector>
 using namespace std;
 
-int main()
+int main(int argc, char *argv[])
 {
 	const char * c_string; //git bash won't open input file with name as a regular string. use this instead
 	string name;
@@ -40,5 +40,6 @@ int main()
 		output << nums[count] << "\t" << nums[count] * nums[count] << "\t" << sum << endl; //output info
 		count++; //update integer count
 	}
+	input.close();
 	return 0;
 }
