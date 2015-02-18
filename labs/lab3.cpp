@@ -1,10 +1,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
 
 using namespace std;
 
-enum State { FIRST, MATCH, NO_MATCH };
+enum State { INIT, FIRST, MATCH, };
 
 // To clear the screen, look up ANSI escape codes
 // Concentration game model
@@ -42,8 +43,8 @@ private:
     // What's the height?
     int height;
     // What'd we flip last?
-    int lastRow;
-    int lastColumn;
+    vector<int> lastRows;
+    vector<int> lastColumns;
     State state;
 };
 
@@ -76,9 +77,7 @@ private:
 Model::Model(int w, int h) {
     width = w;
     height = h;
-    lastRow = -1;
-    lastColumn = -1;
-    state = FIRST;
+    state = INIT;
     grid = new char*[height];
     visible = new char*[height];
     // For every row, create the array for that row
@@ -86,17 +85,37 @@ Model::Model(int w, int h) {
         grid[i] = new char[width];
         visible[i] = new char[width];
     }
-    srand(time(0));
     // TODO: make this random-ish
     // Look at asciitable.com and do some stuff with rand() % number
     // Hint: insert characters in order, then shuffle later in a separate loop
-    for (int i = 0; i < height; i++) {
+    char letter = 'A';
+	for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            grid[i][j] = 'a';
+            grid[i][j] = letter;
             // Everything's invisible at first
-            visible[i][j] = '*';
+			if (j%2==1){
+				letter++;
+				
+				if (letter > 'Z'){
+				letter = 'A';
+					}
+			}
+            visible[i][j] = '*';					
         }
     }
+	srand(time(0));
+	int otheri, otherj;
+	for (int i = 0; i<height; i++)
+	{
+		for ( int j = 0; j < width; j++)
+		{
+			otheri = rand() % height;
+			otherj = rand() % width;
+			letter = grid[i][j];
+			grid[i][j] = grid[otheri][otherj];
+			grid[otheri][otherj] = letter;
+		}
+	}
 }
 // Destructor deletes dynamically allocated memory
 Model::~Model() {
@@ -111,28 +130,57 @@ Model::~Model() {
 // That is, is the row within the height, and is the column within the width?
 // Return whether it is or isn't.
 bool Model::valid(int row, int column) {
-    return true;
+    if (row <= getHeight() && row >= 0 && column <= getWidth() && column >= 0) { return true; }
+	return false;
 }
 bool Model::matched(int row, int column) {
-    return true;
+    if (grid[row][column] != grid[lastRows[0]][lastColumns[0]]) return false;
+	return true;
 }
 // TODO: Flip a cell
 void Model::flip(int row, int column) {
     // If the row and column are not valid, break out and don't do anything
     if (!valid(row, column)) { return; }
-    
-    // If the last selected row and column are invalid,
-        // It means we're selecting the first "cell" to flip
-    // Otherwise, we are selecting the next "cell" to flip
-        // If the last cell and the current cell match, great!
-        // Otherwise, make the last cell invisible (set it to *)
-    // Make the current cell visible
+    switch(state){
+		case INIT:
+			visible[row][column] = grid[row][column];
+			lastRows.push_back(row);
+			lastColumns.push_back(column);
+			state = FIRST;
+			break;
+		case FIRST:
+			visible[row][column] = grid[row][column];
+			lastRows.push_back(row);
+			lastColumns.push_back(column);
+			state = MATCH;
+			break;
+		case MATCH:
+			if (!matched(lastRows[1], lastColumns[1]))	
+			{
+				visible[lastRows[0]][lastColumns[0]] = '*';
+				visible[lastRows[1]][lastColumns[1]] = '*';
+			}
+			lastRows.clear();
+			lastColumns.clear();
+			visible[row][column] = grid[row][column];
+			lastRows.push_back(row);
+			lastColumns.push_back(column);
+			state = FIRST;
+			break;
+	}
 }
 // TODO: If everything is visible, then it's game over
 bool Model::gameOver() {
     // Hint: assume the game is over, unless it isn't
     // Hint: Loop through the grid and see if any element is not visible
-    return false;
+	for (int i = 0; i < getHeight(); i++)
+	{
+		for (int j = 0; j < getWidth(); j++)
+		{
+			if (visible[i][j] == '*') {return false;}
+		}
+	}
+    return true;
 }
 int Model::getWidth() {
     return width;
@@ -164,17 +212,19 @@ void View::show(Model * model) {
 void Controller::loop() {
     int row, col;
     while (!model->gameOver()) {
-        view->show(model);
+		view->show(model);
         cout << "Enter row:    ";
         cin >> row;
         cout << "Enter column: ";
         cin >> col;
         model->flip(row, col);
     }
-    cout << "Hooray, you win!" << endl;
+    view->show(model);
+	cout << "Hooray, you win!" << endl;
 }
 
 int main() {
     Controller c;
     c.loop();
+	return 0;
 }
