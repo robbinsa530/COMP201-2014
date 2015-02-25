@@ -28,6 +28,13 @@ View::View(string title, int width, int height) {
         fail = true;
         return;
     }
+
+    // Initialize True type fonts
+    if( TTF_Init() == -1 ) {
+        return;
+    }
+
+    // Load assets
     snake = load("assets/snake.png");
     music = Mix_LoadMUS("assets/2Inventions_-_Johaness_Gilther_-_Don_t_leave_me.mp3");
     if (music != NULL) {
@@ -35,13 +42,17 @@ View::View(string title, int width, int height) {
     }
     food = Mix_LoadWAV("assets/yummy.wav");
     dead = Mix_LoadWAV("assets/nooo.wav");
+    font = TTF_OpenFont( "assets/LiberationSans-Regular.ttf", 28 );
 }
 
 View::~View() {
+    TTF_CloseFont( font );
+    TTF_Quit();
     Mix_FreeMusic(music);
     Mix_FreeChunk(food);
     Mix_FreeChunk(dead);
     SDL_FreeSurface(snake);
+    SDL_FreeSurface(text);
     SDL_DestroyWindow(window);
     IMG_Quit();
     SDL_Quit();
@@ -101,6 +112,13 @@ void View::show(Model * model) {
         SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format,
         0x00, 0x80, 0x00));
     }
+    
+    
+    SDL_Color textColor = { 255, 255, 255 };
+    text = TTF_RenderText_Solid( font, "Playing: Johaness Gilther - Don't leave me", textColor );
+    dest.x = 10;
+    dest.y = 730;
+    SDL_BlitSurface( text, NULL, screen, &dest );
 
     SDL_UpdateWindowSurface(window);
 }

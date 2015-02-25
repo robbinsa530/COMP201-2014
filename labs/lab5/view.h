@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
 #include "model.h"
 #include <map>
 #include <string>
@@ -23,8 +24,10 @@ private:
     bool fail;
     SDL_Surface* load(char * path);
     SDL_Surface* snake;
+    SDL_Surface* text;
     Mix_Music * music;
     Mix_Chunk * food;
     Mix_Chunk * dead;
+    TTF_Font * font;
 };
 #endif
