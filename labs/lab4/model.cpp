@@ -61,16 +61,45 @@ Model::~Model() {
 // That is, is the row within the height, and is the column within the width?
 // Return whether it is or isn't.
 bool Model::valid(int row, int column) {
-    return true;
+    if ((row < getHeight()) && (row >= 0) && (column < getWidth()) && (column >= 0)) {return true;}
+	return false;
 }
 bool Model::matched(int row, int column) {
-    return true;
+	if ((row == lastRows[0]) && (column == lastColumns[0])) {return false;}
+	if (grid[row][column] != grid[lastRows[0]][lastColumns[0]]){return false;}
+	return true;
 }
 // TODO: Flip a cell
 void Model::flip(int row, int column) {
     // If the row and column are not valid, break out and don't do anything
     if (!valid(row, column)) { return; }
-    visible[row][column] = grid[row][column];
+    switch(state){
+		case INIT:
+			visible[row][column] = grid[row][column];
+			lastRows.push_back(row);
+			lastColumns.push_back(column);
+			state = FIRST;
+			break;
+		case FIRST:
+			visible[row][column] = grid[row][column];
+			lastRows.push_back(row);
+			lastColumns.push_back(column);
+			state = MATCH;
+			break;
+		case MATCH:
+			if (!matched(lastRows[1], lastColumns[1]))	
+			{
+				visible[lastRows[0]][lastColumns[0]] = '_';
+				visible[lastRows[1]][lastColumns[1]] = '_';
+			}
+			lastRows.clear();
+			lastColumns.clear();
+			visible[row][column] = grid[row][column];
+			lastRows.push_back(row);
+			lastColumns.push_back(column);
+			state = FIRST;
+			break;
+	}
 }
 // If everything is visible, then it's game over
 bool Model::gameOver() {
@@ -84,21 +113,7 @@ bool Model::gameOver() {
             }
         }
     }
-    
-    if (isOver) {
-        // Set a nice game over message
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                visible[i][j] = '_';
-            }
-        }
-        visible[2][3] = 'Y';
-        visible[2][4] = 'O';
-        visible[2][5] = 'U';
-        visible[4][3] = 'W';
-        visible[4][4] = 'I';
-        visible[4][5] = 'N';
-    }
+
     return isOver;
 }
 int Model::getWidth() {
@@ -109,4 +124,20 @@ int Model::getHeight() {
 }
 char Model::get(int row, int col) {
     return visible[row][col];
+}
+void Model::gameIsOver() {
+	for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                visible[i][j] = '_';
+            }
+        }
+
+	visible[0][0] = 'Y';
+    visible[0][1] = 'O';
+    visible[0][2] = 'U';
+    visible[1][1] = 'W';
+    visible[1][2] = 'I';
+    visible[1][3] = 'N';
+	
+	return;
 }

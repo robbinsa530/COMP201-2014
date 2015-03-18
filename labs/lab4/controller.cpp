@@ -4,7 +4,7 @@ using namespace std;
 
 Controller::Controller() {
     model = new Model(8,8);
-    view = new View("Concentration!", 1024, 768);
+    view = new View("Concentration!", 640, 640);
 }
 
 Controller::~Controller() {
@@ -32,7 +32,11 @@ void Controller::loop() {
         }
     }
     view->show(model);
-    SDL_Delay(3000);
+    SDL_Delay(200);
+	
+	model->gameIsOver();
+	view->show(model);
+	SDL_Delay(3000);
 }
 
 /*
