@@ -18,6 +18,9 @@ public:
     ~View();
     // Print out the visible stuff in the grid
     void show(Model * model);
+	//iterator
+	Node<Coordinate> * it;
+
 private:
     SDL_Window* window;
     SDL_Surface* screen;

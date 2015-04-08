@@ -4,7 +4,7 @@
 using namespace std;
 
 Controller::Controller() {
-    model = new Model(8,8);
+    model = new Model(64,48); //changed from 8,8
     view = new View("Snake", 1024, 768);
 }
 
@@ -30,7 +30,7 @@ void Controller::loop() {
         currentTime = SDL_GetTicks();
         view->show(model);
         // Crawl (move) once every 100 milliseconds
-        if (currentTime > lastTime + 100) {
+        if (currentTime > lastTime + 85) {
             model->crawl();
             lastTime = currentTime;
         }
@@ -41,7 +41,7 @@ void Controller::loop() {
                 break;
             case SDL_KEYDOWN:
                 switch(e.key.keysym.sym) {
-                case SDLK_DOWN:
+				case SDLK_DOWN:
                 case SDLK_UP:
                 case SDLK_LEFT:
                 case SDLK_RIGHT:
@@ -52,10 +52,16 @@ void Controller::loop() {
                 }
             case SDL_MOUSEBUTTONDOWN:
                 break;
-            }
+            } 
         }
     }
-    // TODO: show something nice?
-    view->show(model);
-    SDL_Delay(5250);
+	
+	 // TODO: show something nice?
+	if (model->gameOver()) {
+		while((model->snake).size() > 1) {
+			model->crawl();
+			view->show(model);
+			SDL_Delay(50);
+		}
+	}
 }

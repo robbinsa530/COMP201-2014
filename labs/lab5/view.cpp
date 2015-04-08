@@ -4,7 +4,10 @@ using namespace std;
 
 // Initialize SDL
 View::View(string title, int width, int height) {
-    fail = false;
+   
+	//it = model->snake.begin();
+	
+	fail = false;
     SDL_SetMainReady();
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) < 0) {
         fail = true;
@@ -19,7 +22,7 @@ View::View(string title, int width, int height) {
     // Get the screen
     screen = SDL_GetWindowSurface(window);
     //Initialize JPEG and PNG loading
-    if( !( IMG_Init( IMG_INIT_JPG|IMG_INIT_PNG ) & (IMG_INIT_JPG|IMG_INIT_PNG) ) ) {
+    if( !( IMG_Init( IMG_INIT_JPG|IMG_INIT_PNG ) && (IMG_INIT_JPG|IMG_INIT_PNG) ) ) { //added another &?
         fail = true;
         return;
     }
@@ -37,9 +40,9 @@ View::View(string title, int width, int height) {
     // Load assets
     snake = load("assets/snake.png");
     music = Mix_LoadMUS("assets/2Inventions_-_Johaness_Gilther_-_Don_t_leave_me.mp3");
-    if (music != NULL) {
+    /**if (music != NULL) {
         Mix_PlayMusic( music, -1 );
-    }
+    }*/
     food = Mix_LoadWAV("assets/yummy.wav");
     dead = Mix_LoadWAV("assets/nooo.wav");
     font = TTF_OpenFont( "assets/LiberationSans-Regular.ttf", 28 );
@@ -87,7 +90,7 @@ void View::show(Model * model) {
     dest.h = 16;
     
     if (model->eating()) {
-        Mix_PlayChannel( -1, food, 0 );
+		Mix_PlayChannel( -1, food, 0 );
     }
     if (model->gameOver()) {
         Mix_PlayChannel( -1, dead, 0 );
@@ -100,17 +103,18 @@ void View::show(Model * model) {
     // HINT: you'd of course need assets for horizontal and vertical snake sections
 
     // Draw food
-    dest.x = model->food.x * 16;
+    
+	dest.x = model->food.x * 16;
     dest.y = model->food.y * 16;
     SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format,
             0x80, 0x00, 0x00));
     
     // Draw the snake
-    for (std::list<Coordinate>::iterator it=model->snake.begin(); it!=model->snake.end(); it++) {
-        dest.x = it->x * 16;
-        dest.y = it->y * 16;
+	for (it=model->snake.begin(); it!=model->snake.end(); it = it->next) {
+        dest.x = it->data.x * 16;
+        dest.y = it->data.y * 16;
         SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format,
-        0x00, 0x80, 0x00));
+        0x00, 0x80, 0x99));
     }
     
     
@@ -119,6 +123,14 @@ void View::show(Model * model) {
     dest.x = 10;
     dest.y = 730;
     SDL_BlitSurface( text, NULL, screen, &dest );
+	
+	if (model->gameOver()) {
+		SDL_Color textColor = {255, 255, 0};
+		text = TTF_RenderText_Solid( font, "GAME OVER", textColor );
+		dest.x = 250;
+		dest.y = 300;
+		SDL_BlitSurface( text, NULL, screen, &dest );
+	}
 
     SDL_UpdateWindowSurface(window);
 }
